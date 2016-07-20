@@ -92,7 +92,8 @@ abstract class AbstractCSVWriter {
      * @param trimmedText the array of bytes that contains the text to output.
      * @throws java.io.IOException appears if the output into writer is impossible.
      */
-    static void checkSurroundByQuotesAndWrite(Writer writer, String delimiter, String trimmedText) throws IOException {
+    protected void checkSurroundByQuotesAndWrite(Writer writer, String delimiter, String trimmedText)
+            throws IOException {
         boolean containsDelimiter = stringContainsItemFromList(trimmedText, delimiter, "\n", "\t", "\r", "\"");
         String trimmedTextWithoutQuotesDuplicates = trimmedText.replace("\"", "\"\"");
         if (containsDelimiter && trimmedTextWithoutQuotesDuplicates.length() != 0) {
@@ -110,7 +111,7 @@ abstract class AbstractCSVWriter {
      * @param items list of strings.
      * @return true if at least one of strings from the list is a substring of original string.
      */
-    private static boolean stringContainsItemFromList(String inputString, String... items) {
+    protected static boolean stringContainsItemFromList(String inputString, String... items) {
         for (String item : items) {
             if (inputString.contains(item)) {
                 return true;

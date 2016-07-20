@@ -76,6 +76,36 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
     private static final String DATE_FORMAT_YYMMDD = "YYMMDD";
 
     /**
+     * One of data formats used in sas7bdat files, corresponds to yyyyMMdd.
+     */
+    private static final String DATE_FORMAT_YYMMDDN = "YYMMDDN";
+
+    /**
+     * One of data formats used in sas7bdat files, corresponds to yyyy MM dd.
+     */
+    private static final String DATE_FORMAT_YYMMDDB = "YYMMDDB";
+
+    /**
+     * One of data formats used in sas7bdat files, corresponds to yyyy:MM:dd.
+     */
+    private static final String DATE_FORMAT_YYMMDDC = "YYMMDDC";
+
+    /**
+     * One of data formats used in sas7bdat files, corresponds to yyyy-MM-dd.
+     */
+    private static final String DATE_FORMAT_YYMMDDD = "YYMMDDD";
+
+    /**
+     * One of data formats used in sas7bdat files, corresponds to yyyy.MM.dd.
+     */
+    private static final String DATE_FORMAT_YYMMDDP = "YYMMDDP";
+
+    /**
+     * One of data formats used in sas7bdat files, corresponds to yyyy/MM/dd.
+     */
+    private static final String DATE_FORMAT_YYMMDDS = "YYMMDDS";
+
+    /**
      * One of data formats used in sas7bdat files, corresponds to MM/dd/yyyy.
      */
     private static final String DATE_FORMAT_MMDDYY = "MMDDYY";
@@ -124,6 +154,12 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
     static {
         Map<String, String> tmpMap = new HashMap<String, String>();
         tmpMap.put(DATE_FORMAT_YYMMDD, "yyyy-MM-dd");
+        tmpMap.put(DATE_FORMAT_YYMMDDN, "yyyyMMdd");
+        tmpMap.put(DATE_FORMAT_YYMMDDB, "yyyy MM dd");
+        tmpMap.put(DATE_FORMAT_YYMMDDC, "yyyy:MM:dd");
+        tmpMap.put(DATE_FORMAT_YYMMDDD, "yyyy-MM-dd");
+        tmpMap.put(DATE_FORMAT_YYMMDDP, "yyyy.MM.dd");
+        tmpMap.put(DATE_FORMAT_YYMMDDS, "yyyy/MM/dd");
         tmpMap.put(DATE_FORMAT_MMDDYY, "MM/dd/yyyy");
         tmpMap.put(DATE_FORMAT_DDMMYY, "dd/MM/yyyy");
         tmpMap.put(DATE_FORMAT, "ddMMMyyyy");
@@ -252,6 +288,8 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
                 } else {
                     processEntry(columns, row, currentColumnIndex);
                 }
+            } else {
+                checkSurroundByQuotesAndWrite(writer, getDelimiter(), null);
             }
             if (currentColumnIndex != columns.size() - 1) {
                 writer.write(getDelimiter());

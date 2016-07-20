@@ -932,7 +932,8 @@ interface SasFileConstants {
      * The date formats to store the day, month, and year. Appear in the data of the
      * {@link SasFileParser.FormatAndLabelSubheader} subheader and are stored in {@link com.epam.parso.Column#format}.
      */
-    List<String> DATE_FORMAT_STRINGS = Arrays.asList("YYMMDD", "MMDDYY", "DDMMYY", "DATE");
+    List<String> DATE_FORMAT_STRINGS = Arrays.asList("YYMMDD", "MMDDYY", "DDMMYY", "DATE",
+            "YYMMDDN", "YYMMDDB", "YYMMDDC", "YYMMDDD", "YYMMDDP", "YYMMDDS");
 
     /**
      * The date formats to store the day, month, year, hour, minutes, seconds, and milliseconds.
