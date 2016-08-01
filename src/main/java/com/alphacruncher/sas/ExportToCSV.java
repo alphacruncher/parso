@@ -10,20 +10,21 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import com.epam.parso.CSVDataWriter;
-import com.epam.parso.impl.DatabaseDialect;
-import com.epam.parso.impl.DialectAwareCSVDataWriterImpl;
+import com.epam.parso.CSVMetadataWriter;
+import com.epam.parso.impl.CSVDataWriterImpl;
+import com.epam.parso.impl.CSVMetadataWriterImpl;
 import com.epam.parso.impl.SasFileReaderImpl;
 
 /**
- * @author daniel.sali@alphacruncher.com
- * sas7bdat to CSV converter class using
- * the CSVWriter functionality of Parso, using a MySQL dialect
+ * @author daniel.sali@alphacruncher.com sas7bdat to CSV converter class using
+ *         the CSVWriter functionality of Parso, using a MySQL dialect
  */
 public final class ExportToCSV {
     /**
      * Private constructor.
      */
-    private ExportToCSV() { }
+    private ExportToCSV() {
+    }
 
     /**
      * The main function, the entry point of execution.
@@ -45,10 +46,19 @@ public final class ExportToCSV {
             return;
         }
         com.epam.parso.SasFileReader sasFileReader = new SasFileReaderImpl(is);
+        try (Writer stdOutWriter = new BufferedWriter(new OutputStreamWriter(
+                System.out))) {
+            stdOutWriter.write("Metadata for " + args[0] + ":\n");
+            CSVMetadataWriter csvMetadataWriter = new CSVMetadataWriterImpl(stdOutWriter);
+            csvMetadataWriter.writeMetadata(sasFileReader.getColumns());
+            stdOutWriter.write("-----------------\n\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(args[1]), "utf-8"))) {
-            CSVDataWriter csvDataWriter = new DialectAwareCSVDataWriterImpl(
-                    writer, DatabaseDialect.MYSQL);
+            CSVDataWriter csvDataWriter = new CSVDataWriterImpl(writer);
             csvDataWriter.writeColumnNames(sasFileReader.getColumns());
             Object[] data;
             while ((data = sasFileReader.readNext()) != null) {

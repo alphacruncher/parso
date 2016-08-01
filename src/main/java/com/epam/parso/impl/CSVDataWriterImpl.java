@@ -48,7 +48,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
     /**
      * The constant to check whether or not a string containing double stores infinity.
      */
-    private static final String DOUBLE_INFINITY_STRING = "Infinity";
+    protected static final String DOUBLE_INFINITY_STRING = "Infinity";
 
     /**
      * The format to output hours in the CSV format.
@@ -129,7 +129,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      * The date formats to store the hour, minutes, seconds, and milliseconds. Appear in the data of
      * the {@link SasFileParser.FormatAndLabelSubheader} subheader and are stored in {@link Column#format}.
      */
-    private static final List<String> TIME_FORMAT_STRINGS = Arrays.asList("TIME", "HHMM");
+    protected static final List<String> TIME_FORMAT_STRINGS = Arrays.asList("TIME", "HHMM");
 
     /**
      * The number of seconds in a minute.
@@ -144,7 +144,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
     /**
      * Encoding used to convert byte arrays to string.
      */
-    private static final String ENCODING = "CP1252";
+    protected static final String ENCODING = "CP1252";
 
     /**
      * The mapping between date formats in sas7bdat files and SimpleDateFormat.
@@ -205,7 +205,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      *                    {@link CSVDataWriterImpl#DATE_OUTPUT_FORMAT_STRINGS} mapping keys.
      * @return the string that corresponds to the date in the format used.
      */
-    private static String convertDateElementToString(Date currentDate, String format) {
+    protected static String convertDateElementToString(Date currentDate, String format) {
         SimpleDateFormat dateFormat;
         String valueToPrint = "";
         dateFormat = new SimpleDateFormat(DATE_OUTPUT_FORMAT_STRINGS.get(format));
@@ -225,7 +225,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      * @param secondsFromMidnight the number of seconds elapsed from the midnight.
      * @return the string of time in the format set by constants.
      */
-    private static String convertTimeElementToString(Long secondsFromMidnight) {
+    protected static String convertTimeElementToString(Long secondsFromMidnight) {
         return String.format(HOURS_OUTPUT_FORMAT, secondsFromMidnight / SECONDS_IN_MINUTE / MINUTES_IN_HOUR)
                 + TIME_DELIMETER
                 + String.format(MINUTES_OUTPUT_FORMAT, secondsFromMidnight / SECONDS_IN_MINUTE % MINUTES_IN_HOUR)
@@ -241,7 +241,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      * @param value the input numeric value to convert.
      * @return the string with the text presentation of the input numeric value.
      */
-    private static String convertDoubleElementToString(Double value) {
+    protected static String convertDoubleElementToString(Double value) {
         String valueToPrint = String.valueOf(value);
         if (valueToPrint.length() > ROUNDING_LENGTH) {
             int lengthBeforeDot = (int) Math.ceil(Math.log10(Math.abs(value)));
@@ -289,7 +289,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
                     processEntry(columns, row, currentColumnIndex);
                 }
             } else {
-                checkSurroundByQuotesAndWrite(writer, getDelimiter(), null);
+                checkSurroundByQuotesAndWrite(writer, getDelimiter(), "");
             }
             if (currentColumnIndex != columns.size() - 1) {
                 writer.write(getDelimiter());
@@ -345,7 +345,7 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      * @param currentColumnIndex index of current entry in row;
      * @throws IOException appears if the output into writer is impossible.
      */
-    private void processEntry(List<Column> columns, Object[] row, int currentColumnIndex) throws IOException {
+    protected void processEntry(List<Column> columns, Object[] row, int currentColumnIndex) throws IOException {
         if (!String.valueOf(row[currentColumnIndex]).contains(DOUBLE_INFINITY_STRING)) {
             String valueToPrint;
             if (row[currentColumnIndex].getClass() == Date.class) {
