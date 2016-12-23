@@ -18,9 +18,9 @@ package com.epam.parso.impl;
 
 import com.epam.parso.Column;
 import com.epam.parso.SasFileProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.io.DataInputStream;
 import java.io.InputStream;
@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.epam.parso.impl.ParserMessageConstants.*;
 import static com.epam.parso.impl.SasFileConstants.*;
@@ -611,14 +613,37 @@ public final class SasFileParser {
                     if (columns.get(currentColumnIndex).getFormat().isEmpty()) {
                         rowElements[currentColumnIndex] = convertByteArrayToNumber(temp);
                     } else {
-                        if (DATE_TIME_FORMAT_STRINGS.contains(columns.get(currentColumnIndex).getFormat())) {
-                            rowElements[currentColumnIndex] = bytesToDateTime(temp);
-                        } else {
-                            if (DATE_FORMAT_STRINGS.contains(columns.get(currentColumnIndex).getFormat())) {
-                                rowElements[currentColumnIndex] = bytesToDate(temp);
-                            } else {
-                                rowElements[currentColumnIndex] = convertByteArrayToNumber(temp);
+                        boolean matchFound = false;
+                        for (Pattern p : DATETIME_FORMATS) {
+                            Matcher m = p.matcher(columns.get(currentColumnIndex).getFormat());
+                            if (m.matches()) {
+                                rowElements[currentColumnIndex] = bytesToDateTime(temp);
+                                matchFound = true;
+                                break;
                             }
+                        }
+                        if (!matchFound) {
+                            for (Pattern p : TIME_FORMATS) {
+                                Matcher m = p.matcher(columns.get(currentColumnIndex).getFormat());
+                                if (m.matches()) {
+                                    rowElements[currentColumnIndex] = bytesToDateTime(temp);
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!matchFound) {
+                            for (Pattern p : DATE_FORMATS) {
+                                Matcher m = p.matcher(columns.get(currentColumnIndex).getFormat());
+                                if (m.matches()) {
+                                    rowElements[currentColumnIndex] = bytesToDate(temp);
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!matchFound) {
+                            rowElements[currentColumnIndex] = convertByteArrayToNumber(temp);
                         }
                     }
                 }
