@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * offsets, column formats, accuracy) as well as the standard constants of time
  * and the sizes of standard data types.
  */
-interface SasFileConstants {
+public interface SasFileConstants {
     /**
      * The size of the long value type in bytes.
      */
@@ -1066,7 +1066,12 @@ interface SasFileConstants {
     /**
      * The number of milliseconds in a second.
      */
-    long MILLISECONDS_IN_SECONDS = 1000L;
+    int MILLISECONDS_IN_SECONDS = 1000;
+
+    /**
+     * The number of nanoseconds in a millisecond.
+     */
+    int NANOSECONDS_IN_MILLISECOND = 1000000;
 
     /**
      * The number of seconds in a minute.

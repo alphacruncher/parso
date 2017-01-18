@@ -16,31 +16,43 @@
 
 package com.epam.parso.impl;
 
-import com.epam.parso.Column;
-import com.epam.parso.SasFileProperties;
+import static com.epam.parso.impl.ParserMessageConstants.BLOCK_COUNT;
+import static com.epam.parso.impl.ParserMessageConstants.COLUMN_FORMAT;
+import static com.epam.parso.impl.ParserMessageConstants.EMPTY_INPUT_STREAM;
+import static com.epam.parso.impl.ParserMessageConstants.FILE_NOT_VALID;
+import static com.epam.parso.impl.ParserMessageConstants.NO_SUPPORTED_COMPRESSION_LITERAL;
+import static com.epam.parso.impl.ParserMessageConstants.NULL_COMPRESSION_LITERAL;
+import static com.epam.parso.impl.ParserMessageConstants.PAGE_TYPE;
+import static com.epam.parso.impl.ParserMessageConstants.SUBHEADER_COUNT;
+import static com.epam.parso.impl.ParserMessageConstants.SUBHEADER_PROCESS_FUNCTION_NAME;
+import static com.epam.parso.impl.ParserMessageConstants.UNKNOWN_SUBHEADER_SIGNATURE;
+import static com.epam.parso.impl.SasFileConstants.*;
+
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.EOFException;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.epam.parso.impl.ParserMessageConstants.*;
-import static com.epam.parso.impl.SasFileConstants.*;
+import com.epam.parso.Column;
+import com.epam.parso.SasFileProperties;
 
 /**
  * This is a class that parses sas7bdat files. When parsing a sas7bdat file, to interact with the library,
@@ -217,6 +229,17 @@ public final class SasFileParser {
     }
 
     /**
+     * Utility method to convert a Java 8 LocalDateTime to java.util.Date.
+     * Nanosecond precision will be lost during the conversion.
+     *
+     * @param localDateTime The nanosecond precision LocalDateTime to convert to a legacy java.util.Date.
+     * @return The java.util.Date value representing the LocalDateTime.
+     */
+    private Date fromLocalDateTime(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.of("UTC")).toInstant());
+    }
+
+    /**
      * The method that reads and parses metadata from the sas7bdat and puts the results in
      * {@link SasFileParser#sasFileProperties}.
      *
@@ -284,8 +307,8 @@ public final class SasFileParser {
         sasFileProperties.setEncoding(this.encoding);
         sasFileProperties.setName(bytesToString(vars.get(2)).trim());
         sasFileProperties.setFileType(bytesToString(vars.get(3)).trim());
-        sasFileProperties.setDateCreated(bytesToDateTime(vars.get(4)));
-        sasFileProperties.setDateModified(bytesToDateTime(vars.get(5)));
+        sasFileProperties.setDateCreated(fromLocalDateTime(bytesToDateTime(vars.get(4))));
+        sasFileProperties.setDateModified(fromLocalDateTime(bytesToDateTime(vars.get(5))));
         sasFileProperties.setHeaderLength(bytesToInt(vars.get(6)));
         sasFileProperties.setPageLength(bytesToInt(vars.get(7)));
         sasFileProperties.setPageCount(bytesToLong(vars.get(8)));
@@ -826,10 +849,13 @@ public final class SasFileParser {
      * @param bytes an array of bytes that stores the type.
      * @return a variable of the {@link Date} type.
      */
-    private Date bytesToDateTime(byte[] bytes) {
+    private LocalDateTime bytesToDateTime(byte[] bytes) {
         double doubleSeconds = bytesToDouble(bytes);
-        return Double.isNaN(doubleSeconds) ? null : new Date((long) ((doubleSeconds - START_DATES_SECONDS_DIFFERENCE)
-                * MILLISECONDS_IN_SECONDS));
+        double secondsSinceEpoch = doubleSeconds - START_DATES_SECONDS_DIFFERENCE;
+        int nanoseconds = (int) ((secondsSinceEpoch - (long) secondsSinceEpoch) * MILLISECONDS_IN_SECONDS
+                * NANOSECONDS_IN_MILLISECOND);
+        return Double.isNaN(doubleSeconds) ? null
+                : LocalDateTime.ofEpochSecond((long) secondsSinceEpoch, nanoseconds, ZoneOffset.UTC);
     }
 
     /**

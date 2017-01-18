@@ -1,4 +1,20 @@
 ﻿# Parso Java library
+
+## Alphacruncher changes:
+***18 January 2017***
+* Date/time columns are recognized using regular expressions on column format strings
+* Datetime columns are returned as LocalDateTime objects with nanosecond precision, using the UTC timezone.
+* Date formatting is done using Apache Commons FastDateFormat, for thread safety.
+* Added ExportDatabaseSchema.java main class which exports the structure of
+SAS files in a folder as a database schema. Supports MySQL and PostgreSQL dialects for output SQL scripts. Command line arguments:
+     * `--dialect` 'MySQL' (default) or 'PostgreSQL'.
+     * `--schema` The name of the database schema to use.
+     * `--engine` The name of the storage engine used, 'InnoDB' is the default.
+     * `--charset` The character set to use (default is 'latin1').
+     * `--collation` The database collation to use (default is 'latin1_bin').
+     * `--folder` The path of the folder where the .sas7bdat files are located.
+     * `--sql-file` The name of the output SQL script file.
+
 ## Parso 2.0.3
 ***15 December 2016***
 

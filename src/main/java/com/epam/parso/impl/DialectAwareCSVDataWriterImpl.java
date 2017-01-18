@@ -2,6 +2,7 @@ package com.epam.parso.impl;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -117,6 +118,9 @@ public class DialectAwareCSVDataWriterImpl extends CSVDataWriterImpl {
             String valueToPrint;
             if (row[currentColumnIndex].getClass() == Date.class) {
                 valueToPrint = convertDateElementToString((Date) row[currentColumnIndex],
+                        columns.get(currentColumnIndex).getFormat());
+            } else if (row[currentColumnIndex].getClass() == LocalDateTime.class) {
+                valueToPrint = convertLocalDateTimeElementToString((LocalDateTime) row[currentColumnIndex],
                         columns.get(currentColumnIndex).getFormat());
             } else {
                 if (TIME_FORMAT_STRINGS.contains(columns.get(currentColumnIndex).getFormat())) {

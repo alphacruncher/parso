@@ -16,20 +16,25 @@
 
 package com.epam.parso.impl;
 
-import com.epam.parso.CSVDataWriter;
-import com.epam.parso.Column;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.util.Date;
 import java.util.TimeZone;
+
+import org.apache.commons.lang3.time.FastDateFormat;
+
+import com.epam.parso.CSVDataWriter;
+import com.epam.parso.Column;
 
 /**
  * This is a class to export the sas7bdat file data into the CSV format.
@@ -206,12 +211,29 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
      * @return the string that corresponds to the date in the format used.
      */
     protected static String convertDateElementToString(Date currentDate, String format) {
-        SimpleDateFormat dateFormat;
         String valueToPrint = "";
-        dateFormat = new SimpleDateFormat(DATE_OUTPUT_FORMAT_STRINGS.get(format));
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        FastDateFormat dateFormat = FastDateFormat.getInstance(DATE_OUTPUT_FORMAT_STRINGS.get(format),
+                TimeZone.getTimeZone("UTC"));
         if (currentDate.getTime() != 0) {
             valueToPrint = dateFormat.format(currentDate.getTime());
+        }
+        return valueToPrint;
+    }
+
+    /**
+     * The function to convert a Java 8 LocalDateTime into a string according to the format used.
+     *
+     * @param currentDate the LocalDateTime to convert.
+     * @param format      the string with the format that must belong to the set of
+     *                    {@link CSVDataWriterImpl#DATE_OUTPUT_FORMAT_STRINGS} mapping keys.
+     * @return the string that corresponds to the date in the format used.
+     */
+    protected static String convertLocalDateTimeElementToString(LocalDateTime currentDate, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_OUTPUT_FORMAT_STRINGS.get(format));
+        String valueToPrint = "";
+        ZonedDateTime zonedDateTime = currentDate.atZone(ZoneOffset.UTC);
+        if (zonedDateTime.toInstant().toEpochMilli() != 0 && zonedDateTime.getNano() != 0) {
+            valueToPrint = formatter.format(currentDate);
         }
         return valueToPrint;
     }
@@ -350,6 +372,9 @@ public class CSVDataWriterImpl extends AbstractCSVWriter implements CSVDataWrite
             String valueToPrint;
             if (row[currentColumnIndex].getClass() == Date.class) {
                 valueToPrint = convertDateElementToString((Date) row[currentColumnIndex],
+                        columns.get(currentColumnIndex).getFormat());
+            } else if (row[currentColumnIndex].getClass() == LocalDateTime.class) {
+                valueToPrint = convertLocalDateTimeElementToString((LocalDateTime) row[currentColumnIndex],
                         columns.get(currentColumnIndex).getFormat());
             } else {
                 if (TIME_FORMAT_STRINGS.contains(columns.get(currentColumnIndex).getFormat())) {
