@@ -206,7 +206,8 @@ public abstract class SchemaExporter {
                 LOGGER.info("Processing :" + file.getFileName());
                 SasFileReader sasFileReader =
                         new SasFileReaderImpl(new FileInputStream(file.toFile()));
-                addCreateTableStatement(file.getFileName().toString(),
+                addCreateTableStatement(file.getFileName().toString()
+                        .replaceAll(".sas7bdat", ""),
                         sasFileReader.getColumns(), sb);
             }
         } catch (IOException | DirectoryIteratorException x) {
