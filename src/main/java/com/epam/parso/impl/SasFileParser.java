@@ -493,10 +493,11 @@ public final class SasFileParser {
     /**
      * The function to read next row from current sas7bdat file.
      *
+     * @param raw if true, long values representing dates will not be converted to dates.
      * @return the object array containing elements of current row.
      * @throws IOException if reading from the {@link SasFileParser#sasFileStream} stream is impossible.
      */
-    Object[] readNext() throws IOException {
+    Object[] readNext(boolean raw) throws IOException {
         if (currentRowInFileIndex++ >= sasFileProperties.getRowCount() || eof) {
             return null;
         }
@@ -519,7 +520,7 @@ public final class SasFileParser {
                         * subheaderPointerLength) % BITS_IN_BYTE;
                 currentRow = processByteArrayWithData(bitOffset + SUBHEADER_POINTERS_OFFSET + alignCorrection
                         + currentPageSubheadersCount * subheaderPointerLength + currentRowOnPageIndex++
-                        * sasFileProperties.getRowLength(), sasFileProperties.getRowLength());
+                        * sasFileProperties.getRowLength(), sasFileProperties.getRowLength(), raw);
                 if (currentRowOnPageIndex == Math.min(sasFileProperties.getRowCount(),
                         sasFileProperties.getMixPageRowCount())) {
                     readNextPage();
@@ -528,7 +529,7 @@ public final class SasFileParser {
                 break;
             case PAGE_DATA_TYPE:
                 currentRow = processByteArrayWithData(bitOffset + SUBHEADER_POINTERS_OFFSET + currentRowOnPageIndex++
-                        * sasFileProperties.getRowLength(), sasFileProperties.getRowLength());
+                        * sasFileProperties.getRowLength(), sasFileProperties.getRowLength(), raw);
                 if (currentRowOnPageIndex == currentPageBlockCount) {
                     readNextPage();
                     currentRowOnPageIndex = 0;
@@ -608,9 +609,10 @@ public final class SasFileParser {
      *
      * @param rowOffset - the offset of the row in cachedPage.
      * @param rowLength - the length of the row.
+     * @param raw - if true, the long valie
      * @return the array of objects storing the data of the row.
      */
-    private Object[] processByteArrayWithData(long rowOffset, long rowLength) {
+    private Object[] processByteArrayWithData(long rowOffset, long rowLength, boolean raw) {
         Object[] rowElements = new Object[(int) sasFileProperties.getColumnsCount()];
         byte[] temp, source;
         int offset;
@@ -635,6 +637,8 @@ public final class SasFileParser {
                 } else {
                     if (columns.get(currentColumnIndex).getFormat().isEmpty()) {
                         rowElements[currentColumnIndex] = convertByteArrayToNumber(temp);
+                    } else if (raw) {
+                        rowElements[currentColumnIndex] = bytesToDouble(temp);
                     } else {
                         boolean matchFound = false;
                         for (Pattern p : DATETIME_FORMATS) {
@@ -1397,7 +1401,7 @@ public final class SasFileParser {
          */
         @Override
         public void processSubheader(long subheaderOffset, long subheaderLength) throws IOException {
-            currentRow = processByteArrayWithData(subheaderOffset, subheaderLength);
+            currentRow = processByteArrayWithData(subheaderOffset, subheaderLength, false);
         }
     }
 }

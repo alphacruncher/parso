@@ -109,15 +109,57 @@ public class SasFileReaderImpl implements SasFileReader {
         return result;
     }
 
+
+    /**
+     * Reads all rows from the sas7bdat file without converting long values to date objects.
+     * Dates will be returned as a double value representing the number of seconds since 1960-01-01 00:00:00.
+     *
+     * @return an array of array objects whose elements can be objects of the following classes: double, long,
+     * int, byte[] depending on the column they are in.
+     */
+    @Override
+    public Object[][] readAllRaw() {
+        int rowNum = (int) getSasFileProperties().getRowCount();
+        Object[][] result = new Object[rowNum][];
+        for (int i = 0; i < rowNum; i++) {
+            try {
+                result[i] = readNextRaw();
+            } catch (IOException e) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("I/O exception, skipping the rest of the file. "
+                            + "Rows read: " + i + ". Expected number of rows from metadata: " + rowNum, e);
+                }
+                break;
+            }
+        }
+        return result;
+    }
+
+
     /**
      * Reads all rows from the sas7bdat file.
      *
      * @return an array of array objects whose elements can be objects of the following classes: double, long,
-     * int, byte[], Date depending on the column they are in.
+     * int, byte[], LocalDateTime depending on the column they are in.
      */
     @Override
     public Object[] readNext() throws IOException {
-        return sasFileParser.readNext();
+        return sasFileParser.readNext(false);
+    }
+
+
+    /**
+     * Reads rows one by one from the sas7bdat file without converting long values to date objects.
+     * Dates will be returned as a double value representing the number of seconds since 1960-01-01 00:00:00.
+     *
+     * @return an array of objects whose elements can be objects of the following classes: double, long,
+     * int, byte[], Date depending on the column they are in.
+     *
+     * @throws IOException if reading input stream is impossible.
+     */
+    @Override
+    public Object[] readNextRaw() throws IOException {
+        return sasFileParser.readNext(true);
     }
 
     /**

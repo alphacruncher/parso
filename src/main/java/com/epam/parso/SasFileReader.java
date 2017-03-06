@@ -34,7 +34,7 @@ public interface SasFileReader {
      * Reads all rows from the sas7bdat file.
      *
      * @return an array of array objects whose elements can be objects of the following classes: double, long,
-     * int, byte[], Date depending on the column they are in.
+     * int, byte[], Date, LocalDateTime depending on the column they are in.
      */
     Object[][] readAll();
 
@@ -42,11 +42,29 @@ public interface SasFileReader {
      * Reads rows one by one from the sas7bdat file.
      *
      * @return an array of objects whose elements can be objects of the following classes: double, long,
-     * int, byte[], Date depending on the column they are in.
+     * int, byte[], Date, LocalDateTime depending on the column they are in.
      *
      * @throws IOException if reading input stream is impossible.
      */
     Object[] readNext() throws IOException;
+
+    /**
+     * Reads all rows from the sas7bdat file without converting long values to date objects.
+     *
+     * @return an array of array objects whose elements can be objects of the following classes: double, long,
+     * int, byte[] depending on the column they are in.
+     */
+    Object[][] readAllRaw();
+
+    /**
+     * Reads rows one by one from the sas7bdat file without converting long values to date objects.
+     *
+     * @return an array of objects whose elements can be objects of the following classes: double, long,
+     * int, byte[], Date depending on the column they are in.
+     *
+     * @throws IOException if reading input stream is impossible.
+     */
+    Object[] readNextRaw() throws IOException;
 
     /**
      * The function to get sas file properties.

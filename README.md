@@ -14,6 +14,9 @@ SAS files in a folder as a database schema. Supports MySQL and PostgreSQL dialec
      * `--collation` The database collation to use (default is 'latin1_bin').
      * `--folder` The path of the folder where the .sas7bdat files are located.
      * `--sql-file` The name of the output SQL script file.
+***06 March 2017***
+### Parso 2.0.4
+* `readNextRaw` and `readAllRaw`: Read records of the .sas7bdat file without converting them to Date and LocalDateTime objects, to avoid the overhead of excessive and unnecessary object creation.
 
 ## Parso 2.0.3
 ***15 December 2016***
