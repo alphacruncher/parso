@@ -856,8 +856,14 @@ public final class SasFileParser {
     private LocalDateTime bytesToDateTime(byte[] bytes) {
         double doubleSeconds = bytesToDouble(bytes);
         double secondsSinceEpoch = doubleSeconds - START_DATES_SECONDS_DIFFERENCE;
-        int nanoseconds = (int) ((secondsSinceEpoch - (long) secondsSinceEpoch) * MILLISECONDS_IN_SECONDS
+        int nanoseconds = 0;
+        if (doubleSeconds > 0) {
+            nanoseconds = (int) ((doubleSeconds - (long) doubleSeconds) * MILLISECONDS_IN_SECONDS
                 * NANOSECONDS_IN_MILLISECOND);
+        } else {
+            nanoseconds = (int) ((1.0 - (doubleSeconds - (long) doubleSeconds)) * MILLISECONDS_IN_SECONDS
+                    * NANOSECONDS_IN_MILLISECOND);
+        }
         return Double.isNaN(doubleSeconds) ? null
                 : LocalDateTime.ofEpochSecond((long) secondsSinceEpoch, nanoseconds, ZoneOffset.UTC);
     }
