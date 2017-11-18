@@ -857,7 +857,7 @@ public final class SasFileParser {
         double doubleSeconds = bytesToDouble(bytes);
         double secondsSinceEpoch = doubleSeconds - START_DATES_SECONDS_DIFFERENCE;
         int nanoseconds = 0;
-        if (doubleSeconds > 0) {
+        if (doubleSeconds >= 0) {
             nanoseconds = (int) ((doubleSeconds - (long) doubleSeconds) * MILLISECONDS_IN_SECONDS
                 * NANOSECONDS_IN_MILLISECOND);
         } else {
